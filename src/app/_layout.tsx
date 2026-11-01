@@ -4,13 +4,16 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+import { shouldShowPhoneFrame, WebPhoneFrame } from '@/components/WebPhoneFrame';
 
 // Тримаємо системну заставку, поки вантажаться шрифти
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [framed] = useState(shouldShowPhoneFrame);
   const [loaded, error] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -24,6 +27,11 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded, error]);
+
+  // У браузері на комп'ютері додаток живе в рамці телефона, а не на весь екран
+  if (framed) {
+    return <WebPhoneFrame />;
+  }
 
   if (!loaded && !error) {
     return null;

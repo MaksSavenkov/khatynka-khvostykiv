@@ -48,6 +48,9 @@ export default function AnimalsScreen() {
   const [filter, setFilter] = useState<Filter>('all');
   // Як показувати тваринок: колодою для свайпів або вертикальним списком
   const [view, setView] = useState<ViewMode>('cards');
+  // «Обране» завжди показуємо списком, колода там не потрібна
+  const lockedToList = filter === 'favorites';
+  const shownView: ViewMode = lockedToList ? 'list' : view;
   // Висота плаваючого верхнього блоку — щоб контент починався під ним
   const [topHeight, setTopHeight] = useState(insets.top + 117);
 
@@ -71,7 +74,7 @@ export default function AnimalsScreen() {
       {/* key скидає колоду/список на початок при зміні фільтра чи вигляду; старе й нове плавно перетікають на місці */}
       <View style={styles.content}>
         <Animated.View
-          key={`${view}-${filter}-${JSON.stringify(petFilters)}`}
+          key={`${shownView}-${filter}-${JSON.stringify(petFilters)}`}
           style={StyleSheet.absoluteFill}
           entering={contentEntering}
           exiting={contentExiting}
@@ -84,7 +87,7 @@ export default function AnimalsScreen() {
                   ? 'Тут з’являться тваринки, яких ти вподобаєш.\nНатисни сердечко, свайпни вправо або двічі тапни картку.'
                   : 'Поки що тут немає тваринок'}
             </Text>
-          ) : view === 'cards' ? (
+          ) : shownView === 'cards' ? (
             <View style={{ marginTop: topHeight + 26 }}>
               <SwipeDeck pets={pets} onOpen={openPet} />
             </View>
@@ -122,7 +125,11 @@ export default function AnimalsScreen() {
             {hasFilters(petFilters) && <View style={styles.filterDot} />}
           </Pressable>
           <LocationPill />
-          <ViewToggle view={view} onPress={() => setView(view === 'cards' ? 'list' : 'cards')} />
+          <ViewToggle
+            view={shownView}
+            disabled={lockedToList}
+            onPress={() => setView(view === 'cards' ? 'list' : 'cards')}
+          />
         </View>
 
         <Filters value={filter} onChange={setFilter} />
@@ -144,7 +151,8 @@ const SLIDE = { duration: 380, easing: smoothEasing };
 
 // Кнопка в правому куті: показує, на який вигляд перемкнемо.
 // Значки м'яко провертаються, і один перетікає в інший (біле коло лишається на місці).
-function ViewToggle({ view, onPress }: { view: ViewMode; onPress: () => void }) {
+// disabled — у «Обраному», де завжди список: кнопка бліда й не натискається
+function ViewToggle({ view, onPress, disabled }: { view: ViewMode; onPress: () => void; disabled?: boolean }) {
   const progress = useSharedValue(view === 'list' ? 1 : 0);
 
   useEffect(() => {
@@ -167,7 +175,12 @@ function ViewToggle({ view, onPress }: { view: ViewMode; onPress: () => void }) 
   });
 
   return (
-    <Pressable onPress={onPress} hitSlop={6} style={[styles.icon48, styles.toggle]}>
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      hitSlop={6}
+      style={[styles.icon48, styles.toggle, disabled && { opacity: 0.4 }]}
+    >
       <Animated.View style={[StyleSheet.absoluteFill, cardsIconStyle]}>
         <Image source={require('../../../assets/images/icon-cards-fan.svg')} style={styles.icon48} />
       </Animated.View>

@@ -1,4 +1,5 @@
 import { Image, type ImageSource } from 'expo-image';
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,7 +10,9 @@ import { colors, fonts, gentleEasing } from '@/theme';
 
 type Props = {
   // Заголовок розділу вгорі екрана
-  screenTitle: string;
+  screenTitle?: string;
+  // Замість заголовка — свій верхній рядок (наприклад, шапка з головної)
+  header?: ReactNode;
   image: ImageSource;
   // Ширина ілюстрації, поділена на висоту
   imageAspectRatio: number;
@@ -28,20 +31,22 @@ const appear = (index: number) =>
     .easing(gentleEasing);
 
 // Порожній розділ: ілюстрація, коротке пояснення й кнопка, що підказує, що робити далі
-export function EmptyState({ screenTitle, image, imageAspectRatio, title, text, action, onBack }: Props) {
+export function EmptyState({ screenTitle, header, image, imageAspectRatio, title, text, action, onBack }: Props) {
   const insets = useSafeAreaInsets();
   const bottomSpace = onBack ? 16 : TAB_BAR_HEIGHT + 20;
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 13, paddingBottom: insets.bottom + bottomSpace }]}>
-      <View style={styles.titleRow}>
-        {onBack && (
-          <Pressable onPress={onBack} hitSlop={10}>
-            <Image source={require('../../assets/images/icon-back-plain.svg')} style={styles.back} />
-          </Pressable>
-        )}
-        <Text style={styles.screenTitle}>{screenTitle}</Text>
-      </View>
+      {header ?? (
+        <View style={styles.titleRow}>
+          {onBack && (
+            <Pressable onPress={onBack} hitSlop={10}>
+              <Image source={require('../../assets/images/icon-back-plain.svg')} style={styles.back} />
+            </Pressable>
+          )}
+          <Text style={styles.screenTitle}>{screenTitle}</Text>
+        </View>
+      )}
 
       <View style={styles.center}>
         <Animated.View entering={appear(0)} style={styles.imageWrap}>

@@ -1,11 +1,11 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { useCity } from '@/data/city';
 import { colors, fonts } from '@/theme';
 
-// «Пігулка» з обраним містом; натиск відкриває вибір міста
+// «Пігулка» з обраним містом і стрілкою вниз; натиск відкриває вибір міста
 export function LocationPill() {
   const city = useCity();
   return (
@@ -13,16 +13,10 @@ export function LocationPill() {
       style={({ pressed }) => [styles.location, pressed && { opacity: 0.6 }]}
       onPress={() => router.push('/city')}
     >
-      <View style={styles.labelRow}>
-        <Text style={styles.label}>Локація</Text>
-        <Image
-          source={require('../../assets/images/icon-chevron-up.svg')}
-          style={[styles.icon, { transform: [{ rotate: '180deg' }] }]}
-        />
-      </View>
       <Text style={styles.value} numberOfLines={1} adjustsFontSizeToFit>
         {city}
       </Text>
+      <Image source={require('../../assets/images/icon-chevron-down-bold.svg')} style={styles.icon} />
     </Pressable>
   );
 }
@@ -32,28 +26,23 @@ const styles = StyleSheet.create({
   location: {
     width: 168,
     height: 48,
+    paddingHorizontal: 12,
     borderRadius: 40,
     backgroundColor: colors.tabBar,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  labelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-  },
-  label: {
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    color: colors.textSecondary,
+    justifyContent: 'center',
+    // Відступ між назвою міста й стрілкою
+    gap: 5,
   },
   value: {
+    flexShrink: 1,
     fontFamily: fonts.medium,
     fontSize: 16,
     color: colors.text,
   },
   icon: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
   },
 });

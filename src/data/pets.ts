@@ -1,6 +1,8 @@
 import type { ImageSource } from 'expo-image';
 import type { ImageStyle } from 'react-native';
 
+import type { Trait } from '@/data/traits';
+
 // Приклади тваринок з дизайну. Пізніше замінимо на справжні дані з сервера.
 
 export type Species = 'cat' | 'dog';
@@ -28,11 +30,14 @@ export type PetProfile = {
   color?: string;
   health?: string[];
   story?: string;
+  // Риси для підбору тваринки (панель «Підібрати тваринку»)
+  traits?: Trait[];
 };
 
 export const profiles: Record<string, PetProfile> = {
   khurma: {
     id: 'khurma',
+    traits: ['slow', 'hugs', 'flat'],
     name: 'Хурма',
     species: 'cat',
     sex: 'female',
@@ -50,6 +55,7 @@ export const profiles: Record<string, PetProfile> = {
   },
   vuhlyk: {
     id: 'vuhlyk',
+    traits: ['slow', 'flat'],
     name: 'Вуглик',
     species: 'cat',
     sex: 'female',
@@ -66,6 +72,7 @@ export const profiles: Record<string, PetProfile> = {
   },
   jack: {
     id: 'jack',
+    traits: ['active', 'chaos', 'kids'],
     name: 'Джек',
     species: 'dog',
     sex: 'male',
@@ -85,6 +92,7 @@ export const profiles: Record<string, PetProfile> = {
   // Котики з колоди «Тварини» (окремий макет у Figma)
   'vuhlyk-black': {
     id: 'vuhlyk-black',
+    traits: ['slow', 'hugs', 'flat'],
     name: 'Вуглик',
     species: 'cat',
     sex: 'male',
@@ -101,6 +109,7 @@ export const profiles: Record<string, PetProfile> = {
   },
   karasyk: {
     id: 'karasyk',
+    traits: ['slow', 'flat'],
     name: 'Карасик',
     species: 'cat',
     sex: 'male',
@@ -119,6 +128,7 @@ export const profiles: Record<string, PetProfile> = {
   // Песики з колоди «Тварини»
   emily: {
     id: 'emily',
+    traits: ['active', 'chaos'],
     name: 'Емілі',
     species: 'dog',
     sex: 'female',
@@ -135,6 +145,7 @@ export const profiles: Record<string, PetProfile> = {
   },
   cooper: {
     id: 'cooper',
+    traits: ['active', 'hugs', 'kids'],
     name: 'Купер',
     species: 'dog',
     sex: 'male',

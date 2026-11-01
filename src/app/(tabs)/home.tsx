@@ -4,12 +4,14 @@ import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, type ImageStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { LocationPill } from '@/components/LocationPill';
+import { AppHeader } from '@/components/AppHeader';
+import { MatchSheet } from '@/components/MatchSheet';
 import { PetCard } from '@/components/PetCard';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { TAB_BAR_HEIGHT } from '@/components/TabBar';
 import { homelessPets, nearbyPets, type Pet } from '@/data/pets';
 import { SHELTERS, type Shelter } from '@/data/shelters';
+import { TRAITS, type Trait } from '@/data/traits';
 import { colors, fonts } from '@/theme';
 
 // Поки що кнопки на головній нікуди не ведуть — додамо на наступних етапах
@@ -54,6 +56,8 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   // Висота плаваючого верху — щоб контент починався під ним
   const [headerHeight, setHeaderHeight] = useState(insets.top + 61);
+  // Панель «Підібрати тваринку»: undefined — закрита; можна відкрити одразу з обраною плашкою
+  const [match, setMatch] = useState<{ initial?: Trait } | undefined>();
 
   return (
     <View style={styles.screen}>
@@ -70,11 +74,16 @@ export default function HomeScreen() {
             <Text style={styles.cardSubtitle}>Обери варіанти та знайди свого пухнастого друга.</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-            <Chip icon={require('../../../assets/images/icon-footprints.svg')} label="Завжди в русі" />
-            <Chip icon={require('../../../assets/images/icon-coffee.svg')} label="Повільні ранки" />
-            <Chip icon={require('../../../assets/images/icon-zap.svg')} label="Готовий до хаосу" />
+            {TRAITS.map((trait) => (
+              <Chip
+                key={trait.key}
+                icon={trait.icon}
+                label={trait.label}
+                onPress={() => setMatch({ initial: trait.key })}
+              />
+            ))}
           </ScrollView>
-          <PrimaryButton title="Підібрати тваринку" onPress={notReadyYet} />
+          <PrimaryButton title="Підібрати тваринку" onPress={() => setMatch({})} />
         </Card>
 
         <PetSection title="Вони шукають дім" pets={homelessPets} />
@@ -134,45 +143,10 @@ export default function HomeScreen() {
         onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
         pointerEvents="box-none"
       >
-        <Header />
+        <AppHeader />
       </View>
-    </View>
-  );
-}
 
-function Header() {
-  return (
-    <View style={styles.header}>
-      {/* Фото профілю веде на сторінку профілю */}
-      <Pressable
-        style={({ pressed }) => [styles.avatar, pressed && { opacity: 0.7 }]}
-        onPress={() => router.push('/profile')}
-        hitSlop={6}
-      >
-        <Image
-          source={require('../../../assets/images/avatar.png')}
-          contentFit="fill"
-          style={{
-            position: 'absolute',
-            left: '-25%',
-            top: '-0.74%',
-            width: '147.98%',
-            height: '184.07%',
-          }}
-        />
-      </Pressable>
-      <LocationPill />
-      {/* Дзвіночок відкриває сповіщення; сірий кружечок — скільки їх непрочитаних (поки нуль) */}
-      <Pressable
-        onPress={() => router.push('/notifications')}
-        hitSlop={6}
-        style={({ pressed }) => pressed && { opacity: 0.7 }}
-      >
-        <Image source={require('../../../assets/images/icon-bell.svg')} style={styles.icon48} />
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>0</Text>
-        </View>
-      </Pressable>
+      {match && <MatchSheet initial={match.initial} onClose={() => setMatch(undefined)} />}
     </View>
   );
 }
@@ -208,9 +182,9 @@ function Card({ children, style }: { children: ReactNode; style?: object }) {
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
-function Chip({ icon, label }: { icon: ImageSource; label: string }) {
+function Chip({ icon, label, onPress }: { icon: ImageSource; label: string; onPress: () => void }) {
   return (
-    <Pressable style={styles.chip} onPress={notReadyYet}>
+    <Pressable style={({ pressed }) => [styles.chip, pressed && { opacity: 0.8 }]} onPress={onPress}>
       <Image source={icon} style={styles.icon24} />
       <Text style={styles.chipLabel}>{label}</Text>
     </Pressable>
@@ -270,44 +244,9 @@ const styles = StyleSheet.create({
   content: {
     gap: 28,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 40,
-    overflow: 'hidden',
-    backgroundColor: colors.placeholder,
-  },
   icon24: {
     width: 24,
     height: 24,
-  },
-  icon48: {
-    width: 48,
-    height: 48,
-  },
-  // Лічильник на дзвіночку там, де раніше була крапка
-  badge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    minWidth: 16,
-    height: 16,
-    paddingHorizontal: 4,
-    borderRadius: 8,
-    backgroundColor: colors.placeholder,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: {
-    fontFamily: fonts.medium,
-    fontSize: 10,
-    lineHeight: 12,
-    color: colors.white,
   },
   card: {
     marginHorizontal: 16,
@@ -344,9 +283,12 @@ const styles = StyleSheet.create({
   chips: {
     gap: 8,
   },
+  // Усі плашки однакові — за найдовшою «Готовий до хаосу» (з невеликим запасом)
   chip: {
+    width: 216,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
     padding: 20,
     borderRadius: 16,
