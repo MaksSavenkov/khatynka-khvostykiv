@@ -6,14 +6,16 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
-import { shouldShowPhoneFrame, WebPhoneFrame } from '@/components/WebPhoneFrame';
+import { iPhoneInsets, shouldShowPhoneFrame, WebPhoneFrame } from '@/components/WebPhoneFrame';
 
 // Тримаємо системну заставку, поки вантажаться шрифти
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [framed] = useState(shouldShowPhoneFrame);
+  const [phoneInsets] = useState(iPhoneInsets);
   const [loaded, error] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -37,7 +39,7 @@ export default function RootLayout() {
     return null;
   }
 
-  return (
+  const app = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
@@ -48,4 +50,7 @@ export default function RootLayout() {
       </Stack>
     </GestureHandlerRootView>
   );
+
+  // У браузері в рамці телефона підставляємо відступи iPhone 13
+  return phoneInsets ? <SafeAreaInsetsContext.Provider value={phoneInsets}>{app}</SafeAreaInsetsContext.Provider> : app;
 }

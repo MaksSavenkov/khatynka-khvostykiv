@@ -15,6 +15,22 @@ export function shouldShowPhoneFrame() {
   return !insideFrame && window.innerWidth >= 700;
 }
 
+// Відступи iPhone 13: рядок стану зверху й смужка «додому» знизу.
+// Браузер на комп'ютері їх не має, тож у рамці телефона (і для демо-запису, адреса з ?iphone)
+// підставляємо їх самі — тоді додаток розкладається точно як на телефоні.
+export function iPhoneInsets() {
+  if (typeof window === 'undefined') return null;
+  const wanted = new URLSearchParams(window.location.search).has('iphone');
+  return wanted ? { top: 47, bottom: 34, left: 0, right: 0 } : null;
+}
+
+// Та сама адреса, але з позначкою ?iphone — щоб у рамці були відступи справжнього телефона
+function withIPhoneFlag(href: string) {
+  const url = new URL(href);
+  url.searchParams.set('iphone', '1');
+  return url.toString();
+}
+
 export function WebPhoneFrame() {
   const [scale, setScale] = useState(1);
 
@@ -51,7 +67,7 @@ export function WebPhoneFrame() {
       >
         <iframe
           title="Хатинка хвостиків"
-          src={window.location.href}
+          src={withIPhoneFlag(window.location.href)}
           style={{
             width: SCREEN_W,
             height: SCREEN_H,
