@@ -30,7 +30,15 @@ export function HeartButton({ petId, icon, style }: Props) {
   }));
 
   return (
-    <Pressable onPress={() => toggleFavorite(petId)} hitSlop={8} style={style}>
+    <Pressable
+      onPress={(e) => {
+        // Лайк не повинен заодно відкривати картку, на якій лежить сердечко
+        e.stopPropagation();
+        toggleFavorite(petId);
+      }}
+      hitSlop={8}
+      style={style}
+    >
       <View style={styles.button}>
         <Image source={icon} style={styles.icon} />
         <Animated.View style={[StyleSheet.absoluteFill, fillStyle]}>
